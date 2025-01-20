@@ -19,7 +19,7 @@ app.use(cookieParser());
 const _dirname = path.resolve();
 
 const corsOption = {
-  origin: "https://library-management-system-bncw.vercel.app", // Specify the client origin
+  origin: "https://library-management-system-oo5a-892t8i5ev.vercel.app", // Specify the client origin
   credentials: true, // Include credentials if necessary
 };
 app.use(cors(corsOption));
