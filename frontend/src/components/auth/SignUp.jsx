@@ -10,7 +10,8 @@ import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "@/redux/authSlice";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -19,6 +20,13 @@ const SignUp = () => {
 
   // Initialize react-hook-form
   const { register, handleSubmit, formState: { errors } } = useForm();
+
+    const [showPassword, setShowPassword] = useState(false);
+    
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    setShowPassword((prev) => !prev);
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -50,7 +58,7 @@ const SignUp = () => {
       <div className="flex items-center justify-center max-w-7xl mx-auto font-sans">
         <form
           onSubmit={handleSubmit(onSubmit)}  // Handle form submission using React Hook Form
-          className="w-4/5 md:max-w-sm border border-gray-200 rounded-md p-4 my-10"
+          className="w-4/5 md:max-w-sm border rounded-md p-4 my-10"
         >
           <h1 className="font-bold text-2xl mb-5">Sign Up</h1>
 
@@ -82,10 +90,10 @@ const SignUp = () => {
           </div>
 
           {/* Password */}
-          <div className="my-2">
+          <div className="my-2 relative">
             <Label>Password</Label>
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="******"
               {...register("password", {
                 required: "Password is required",
@@ -93,6 +101,14 @@ const SignUp = () => {
               })}
               className={`border ${errors.password ? "border-red-500" : "border-gray-300"}`}
             />
+            <button
+              type="button" // Prevent form submission
+              className="absolute top-1/2 right-2 "
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? <Eye color="grey" /> : <EyeOff color="grey" />}
+            </button>
+          
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
           </div>
 

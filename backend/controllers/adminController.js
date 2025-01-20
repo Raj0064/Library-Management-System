@@ -1,11 +1,13 @@
 
 import { Book } from "../models/BookModel.js";
+import { Transaction } from "../models/TransactionModel.js";
+import { User } from "../models/UserModel.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
 
 export const addBook = async (req, res) => {
   try {
-    const { title, author, genre, ISBN, publicationDate, totalCopies } =
+    const { title, author, genre, ISBN, publicationYear, totalCopies } =
       req.body;
 const file = req.file;
 let coverImage;
@@ -20,7 +22,7 @@ if (file) {
   coverImage = "https://www.hachette.co.nz/graphics/CoverNotAvailable.jpg";
 }
 
-    if (!title || !ISBN || !author || !totalCopies) {
+    if (!title || !ISBN || !author || !totalCopies||!publicationYear) {
       return res.status(400).json({
         message: "Something is Missing",
         success: false,
@@ -31,7 +33,7 @@ if (file) {
       author,
       genre,
       ISBN,
-      publicationDate,
+      publicationYear,
       totalCopies,
       copiesAvailable:totalCopies,
       coverImage
@@ -49,7 +51,7 @@ if (file) {
 
 export const updateBook = async (req, res) => {
   try {
-    const { title, author, genre, ISBN, totalCopies,publicationDate } = req.body;
+    const { title, author, genre, ISBN, totalCopies,publicationYear } = req.body;
     const file = req.file;
     let coverImage;
 
@@ -80,7 +82,7 @@ export const updateBook = async (req, res) => {
       genre,
       ISBN,
       totalCopies,
-      publicationDate,
+      publicationYear,
       copiesAvailable: Math.max(0, updatedCopiesAvailable),
     };
     if (coverImage) updateData.coverImage = coverImage;
@@ -119,6 +121,13 @@ export const deleteBook = async (req, res) => {
          success: false,
        });
     }
+    if(book.copiesAvailable<book.totalCopies){
+      return res.status(400).json({
+        message: "Book has been borrowed",
+        success: false,
+      });
+    }
+    
 
     return res.status(200).json({
       message: `${book.title} Deleted Successfully`,
@@ -127,9 +136,113 @@ export const deleteBook = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      message: "An error occurred while deleting the book",
+      success: false,
+    });
   }
 }
 
+export const getAllStudents=async(req,res)=>{
+  try {
+    const students=await User.find({role:"student"});
+    if (!students) {
+      return res.status(400).json({
+        message: "Students Not Found",
+        success: false,
+      });
+    }
+     return res.status(200).json({
+       data:students,
+       success: true,
+     });
+  } catch (error) {
+     console.error("Error updating book:", error);
+     return res.status(500).json({
+       message: "An error occurred while fetching students",
+       success: false,
+     });
+  }
+}
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(400).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: `${user.fullname} Deleted Successfully`,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "An error occurred while deleting the student",
+      success: false,
+    });
+  }
+};
+
+export const AdminDashboardStats=async (req, res) => {
+  try {
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalBooks = await Book.countDocuments({});
+    const totalCopies = await Book.aggregate([
+      { $group: { _id: null, total: { $sum: "$totalCopies" } } },
+    ]);
+   const users = await User.find({
+     borrowedBooks: { $exists: true, $not: { $size: 0 } },
+   });
+   const borrowedBooks = users.reduce(
+     (count, user) => count + (user.borrowedBooks?.length || 0),
+     0
+   );
+    const overdueBooks = await User.countDocuments({
+      "borrowedBooks.dueDate": { $lt: new Date() },
+    });
+
+    res.json({
+      totalStudents,
+      totalBooks,
+      totalCopies: totalCopies[0]?.total || 0,
+      borrowedBooks,
+      overdueBooks,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching dashboard stats", error });
+  }
+};
+
+// Get recent transactions
+export const getRecentTransactions = async (req, res) => {
+  try {
+    // Fetch the 5 most recent transactions
+    const transactions = await Transaction.find()
+      .sort({ createdAt: -1 }) // Sort by the latest createdAt
+      .limit(5) // Limit to 5 most recent transactions
+      .populate("user", "fullname") // Populate user field with 'fullname' (or adjust as needed)
+      .populate("book", "title") // Populate book field with 'title' (or adjust as needed)
+      .exec();
+
+    // Send the transactions data as a response
+    res.json({
+      success: true,
+      data: transactions,
+    });
+  } catch (error) {
+    console.error("Error fetching recent transactions:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching recent transactions",
+    });
+  }
+};
 
 
 //Bulk Books add
@@ -147,7 +260,7 @@ export const addBooksInBulk = async (req, res) => {
     // Process each book and upload
     const addedBooks = [];
     for (const book of books) {
-      const { title, author, genre, ISBN, publicationDate, totalCopies } = book;
+      const { title, author, genre, ISBN, publicationYear, totalCopies } = book;
       const file = book.coverImage; // Assuming coverImage is passed as a URL or file
 
       let coverImage;
@@ -166,7 +279,7 @@ export const addBooksInBulk = async (req, res) => {
         author,
         genre,
         ISBN,
-        publicationDate,
+        publicationYear,
         totalCopies,
         copiesAvailable: totalCopies,
         coverImage

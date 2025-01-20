@@ -7,7 +7,7 @@ export const borrowBook = async (req, res) => {
     const bookId = req.params.id;
     const userId = req.id;
 
-    const book = await Book.findById(bookId);
+    const book = await Book.findById(bookId).populate("");
     const user = await User.findById(userId);
 
     if (!book) {
@@ -20,6 +20,12 @@ export const borrowBook = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         message: "User Not Found",
+        success: false,
+      });
+    }
+    if(user.borrowedBooks.length>=10)  {
+      return res.status(400).json({
+        message: "You have already borrowed 10 books",
         success: false,
       });
     }
@@ -63,11 +69,12 @@ export const borrowBook = async (req, res) => {
 
     await user.save();
 
-    return res.json({
-      message: "Book borrowed successfully!",
+    return res.status(200).json({
+      message: `${book.title} Book borrowed successfully!`,
       book: book.title,
       transactionId: transaction._id,
       dueDate: transaction.dueDate,
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -141,6 +148,7 @@ export const returnBook = async (req, res) => {
       message: "Book returned successfully",
       returnDate: transaction.returnDate,
       fine: transaction.fine || 0,
+      success:true
     });
   } catch (error) {
     console.error(error);
@@ -172,17 +180,18 @@ export const getBookById = async (req, res) => {
 };
 
 //Get all books 
-export const getAllBooks=async(req,res)=>{
+export const getAllBooks = async (req, res) => {
   try {
-  const allBooks=await Book.find();
-  return res.status(200).json({
-    data:allBooks,
-    success:true
-  })
-  }
-    catch (error) {
+    // Fetch all books sorted by updatedAt in descending order
+    const allBooks = await Book.find().sort({ createdAt: -1 });
+    return res.status(200).json({
+      data: allBooks,
+      success: true,
+    });
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", success: false });
   }
-  }
+};
+
 

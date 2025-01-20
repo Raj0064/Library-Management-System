@@ -2,9 +2,10 @@ import { setSingleBook } from "@/redux/bookSlice";
 import { BOOK_API_END_POINT } from "@/utils/constant";
 import axios from "axios";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const useGetSingleBook = (bookId) => {
+  const {singlebook}=useSelector(store=>store.book);
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchSingleBook = async () => {
@@ -12,7 +13,6 @@ const useGetSingleBook = (bookId) => {
         const res = await axios.get(`${BOOK_API_END_POINT}/get/${bookId}`, {
           withCredentials: true
         });
-
 
         if (res.data.success) {
           dispatch(setSingleBook(res.data.book))
@@ -22,6 +22,6 @@ const useGetSingleBook = (bookId) => {
       }
     }
     fetchSingleBook();
-  }, [dispatch]);
+  }, [dispatch,singlebook]);
 }
 export default useGetSingleBook;

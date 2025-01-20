@@ -20,29 +20,27 @@ const UpdateBook = () => {
 
   const {singlebook}=useSelector(store=>store.book);
   const book=singlebook;
-  console.log(book);
   
   const [input, setInput] = useState({
     title: "",
     author: "",
     genre: "",
     ISBN: '',
-    publicationDate: '',
+    publicationYear: '',
     totalCopies: '',
     file: ''
   })
 
   useEffect(() => {
     if (book) {
-      // Assuming book.publicationDate might not be in 'YYYY-MM-DD' format
-      const formattedDate = new Date(book.publicationDate).toISOString().split('T')[0];
+      
 
       setInput({
         title: book.title || "",
         author: book.author || "",
         genre: book.genre || "",
         ISBN: book.ISBN || "",
-        publicationDate: formattedDate || "",  // Convert to 'YYYY-MM-DD' format
+        publicationYear: book.publicationYear, 
         totalCopies: book.totalCopies || "",
         file: ""
       });
@@ -129,19 +127,28 @@ const UpdateBook = () => {
 
             {/* Genre */}
             <div>
-              <Label htmlFor="genre" className="block text-sm font-medium text-foreground">
-                Genre
-              </Label>
-              <Input
-                id="genre"
-                name="genre"
-                type="text"
-                value={input.genre}
-                placeholder="Enter the genre"
-                onChange={changeEventHandler}
-                required
-              />
-            </div>
+                          <Label htmlFor="genre" className="block text-sm font-medium text-foreground">
+                            Genre
+                          </Label>
+                          <select
+                            id="genre"
+                            name="genre"
+                            value={input.genre}
+                            onChange={changeEventHandler}
+                            required
+                            className="px-4 py-2 rounded-md border w-full"
+                          >
+                            <option value="" disabled>Select a genre</option>
+                            <option value="Science">Science</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Business">Business</option>
+                            <option value="Technology">Technology</option>
+                            <option value="History">History</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Programming">Programming</option>
+                          </select>
+                        </div>
           </div>
 
           {/* ISBN */}
@@ -162,17 +169,18 @@ const UpdateBook = () => {
               />
             </div>
 
-            {/* publicationDate */}
+            {/* publicationYear */}
             <div className="w-full md:w-1/2">
-              <Label htmlFor="publicationDate" className="block text-sm font-medium text-foreground">
-                Publication Date
+              <Label htmlFor="publicationYear" className="block text-sm font-medium text-foreground">
+                Publication Year
               </Label>
               <Input
                 className="bg-background text-foreground"
-                id="publicationDate"
-                name="publicationDate"
-                type="date"
-                value={input.publicationDate}
+                id="publicationYear"
+                name="publicationYear"
+                type="Number"
+                placeholder="2021"
+                value={input.publicationYear}
                 onChange={changeEventHandler}
                 required
               />
@@ -228,7 +236,7 @@ const UpdateBook = () => {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader className="animate-spin" size={16} />
-                  Creating...
+                  Updating...
                 </span>
               ) : (
                 'Update Book'

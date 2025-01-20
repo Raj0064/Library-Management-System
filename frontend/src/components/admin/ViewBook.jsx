@@ -13,7 +13,9 @@ const ViewBook = () => {
 
   const { singlebook } = useSelector((store) => store.book);
   const book = singlebook;
-  const formattedDate = new Date(book.publicationDate).toISOString().split('T')[0];
+
+  // Check if publicationYear is valid
+ 
 
   return (
     <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
@@ -26,7 +28,7 @@ const ViewBook = () => {
           <img
             src={book.coverImage}
             alt={book.title}
-            className="h-96 max-w-full object-contain rounded-md shadow-md border border-gray-200 dark:border-gray-700"
+           className="h-96 w-64 object-cover rounded-md shadow-md border border-gray-200 dark:border-gray-700"
           />
         </div>
 
@@ -45,7 +47,7 @@ const ViewBook = () => {
                 <span className="font-medium">ISBN:</span> {book.ISBN}
               </li>
               <li>
-                <span className="font-medium">Publication Date:</span> {formattedDate}
+                <span className="font-medium">Publication Year:</span> {book.publicationYear}
               </li>
               <li>
                 <span className="font-medium">Total Copies:</span> {book.totalCopies}
@@ -66,7 +68,7 @@ const ViewBook = () => {
             </Button>
             <Button
               onClick={() => navigate(`/admin/updatebook/${bookId}`)}
-              className=" text-white px-4 py-2 rounded-md"
+              className="text-white px-4 py-2 rounded-md"
             >
               Update Book
             </Button>

@@ -5,6 +5,7 @@ const bookSlice = createSlice({
   initialState: {
     books: [],
     singlebook: {},
+    borrowedbooks:[],
   },
   reducers: {
     setBooks: (state, action) => {
@@ -13,7 +14,10 @@ const bookSlice = createSlice({
     setSingleBook: (state, action) => {
       state.singlebook = action.payload;
     },
+    setBorrowedBooks: (state, action) => {
+      state.borrowedbooks = action.payload;
+    },
   },
 });
 export default bookSlice.reducer;
-export const { setBooks,setSingleBook } = bookSlice.actions;
+export const { setBooks,setSingleBook,setBorrowedBooks } = bookSlice.actions;

@@ -17,19 +17,10 @@ const AddBook = () => {
     author: "",
     genre: "",
     ISBN: '',
-    publicationDate: '',
+    publicationYear: '',
     totalCopies: '',
     file: ''
   })
-
-  const formdata = new FormData();
-  formdata.append("title", input.title);
-  formdata.append("author", input.author);
-  formdata.append("genre", input.genre);
-  formdata.append("ISBN", input.ISBN);
-  formdata.append("totalCopies", input.totalCopies);
-
-  formdata.append("file", input.file);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value })
@@ -43,24 +34,36 @@ const AddBook = () => {
     e.preventDefault();
     try {
       setLoading(true);
+
+      // Create formdata inside submit handler to use latest input state
+      const formdata = new FormData();
+      formdata.append("title", input.title);
+      formdata.append("author", input.author);
+      formdata.append("genre", input.genre);
+      formdata.append("ISBN", input.ISBN);
+      formdata.append("totalCopies", input.totalCopies);
+      formdata.append("publicationYear", input.publicationYear);
+      formdata.append("file", input.file);
+
       const res = await axios.post(`${ADMIN_API_END_POINT}/addBook`, formdata, {
         headers: {
           "Content-Type": "multipart/form-data"
         },
         withCredentials: true
-      })
+      });
+
       if (res.data.success) {
         navigate("/admin/books");
         toast.success(res.data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
-
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
+
   const [loading, setLoading] = useState(false);
 
   return (
@@ -83,9 +86,8 @@ const AddBook = () => {
             />
           </div>
 
-          {/* Author */}
+          {/* Author & Genre */}
           <div className='flex flex-col md:flex-row gap-4 justify-between'>
-
             <div>
               <Label htmlFor="author" className="block text-sm font-medium text-foreground">
                 Author
@@ -100,24 +102,32 @@ const AddBook = () => {
               />
             </div>
 
-            {/* Genre */}
             <div>
               <Label htmlFor="genre" className="block text-sm font-medium text-foreground">
                 Genre
               </Label>
-              <Input
+              <select
                 id="genre"
                 name="genre"
-                type="text"
                 value={input.genre}
-                placeholder="Enter the genre"
                 onChange={changeEventHandler}
                 required
-              />
+                className="px-4 py-2 rounded-md border w-full"
+              >
+                <option value="" disabled>Select a genre</option>
+                <option value="Science">Science</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Business">Business</option>
+                <option value="Technology">Technology</option>
+                <option value="History">History</option>
+                <option value="Arts">Arts</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Programming">Programming</option>
+              </select>
             </div>
           </div>
 
-          {/* ISBN */}
+          {/* ISBN & Publication Date */}
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="w-full md:w-1/2">
               <Label htmlFor="ISBN" className="block text-sm font-medium text-foreground">
@@ -135,30 +145,30 @@ const AddBook = () => {
               />
             </div>
 
-            {/* publicationDate */}
             <div className="w-full md:w-1/2">
-              <Label htmlFor="publicationDate" className="block text-sm font-medium text-foreground">
-                Publication Date
+              <Label htmlFor="publicationYear" className="block text-sm font-medium text-foreground">
+                Publication Year
               </Label>
               <Input
-                className="bg-background text-foreground"
-                id="publicationDate"
-                name="publicationDate"
-                type="date"
-                value={input.publicationDate}
+                id="publicationYear"
+                name="publicationYear"
+                type="number"
+                placeholder="2021"
+                value={input.publicationYear}
                 onChange={changeEventHandler}
                 required
+                min="1900"
+                max={new Date().getFullYear()} // Dynamic max value for the current year
+                className="bg-background text-foreground"
               />
             </div>
 
-          </div >
+          </div>
 
-
+          {/* Copies Available & Cover Image */}
           <div className="flex flex-col md:flex-row gap-4 justify-between">
-
-            {/* Copies Available */}
             <div className="w-full md:w-1/2">
-              <Label htmlFor="ISBN" className="block text-sm font-medium text-foreground">
+              <Label htmlFor="totalCopies" className="block text-sm font-medium text-foreground">
                 No of Copies
               </Label>
               <Input
@@ -167,14 +177,13 @@ const AddBook = () => {
                 type="number"
                 placeholder="10"
                 value={input.totalCopies}
-                minvalue="5"
+                min="5"
                 onChange={changeEventHandler}
                 required
                 className="w-full"
               />
             </div>
 
-            {/* Image */}
             <div>
               <Label htmlFor="coverImage" className="block text-sm font-medium text-foreground">
                 Cover Image
@@ -187,9 +196,7 @@ const AddBook = () => {
                 onChange={changeFileHandler}
               />
             </div>
-
           </div>
-
 
           {/* Submit Button */}
           <div>

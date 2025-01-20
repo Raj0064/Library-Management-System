@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
+
 const UserSchema = new mongoose.Schema(
   {
     fullname: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    libraryId: {
+      type: String,
+      unique: true,
+    },
     role: {
       type: String,
       enum: ["admin", "student"],
@@ -21,9 +26,27 @@ const UserSchema = new mongoose.Schema(
         dueDate: { type: Date },
       },
     ],
-    // wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
     fines: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
-export const User=mongoose.model("UserModel",UserSchema);
+
+// Pre-save hook to generate unique 6-digit libraryId
+UserSchema.pre("save", async function (next) {
+  if (!this.libraryId) {
+    let newLibraryId;
+    let idExists = true;
+
+    while (idExists) {
+      newLibraryId = Math.floor(100000 + Math.random() * 900000).toString();
+      idExists = await mongoose
+        .model("UserModel")
+        .exists({ libraryId: newLibraryId });
+    }
+
+    this.libraryId = newLibraryId;
+  }
+  next();
+});
+
+export const User = mongoose.model("UserModel", UserSchema);

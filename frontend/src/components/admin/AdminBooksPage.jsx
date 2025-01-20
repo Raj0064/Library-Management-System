@@ -23,7 +23,6 @@ const AdminBooksPage = () => {
   const navigate=useNavigate();
   useGetAllBooks();
   const {books}=useSelector(store=>store.book);
-  console.log(books);
 
   const [searchQuery, setSearchQuery] = useState('');
 

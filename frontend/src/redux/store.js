@@ -1,5 +1,8 @@
 import authSlice from "./authSlice";
 import bookSlice from "./bookSlice";
+import studentSlice from "./studentSlice";
+import searchSlice from "./searchSlice";
+
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 //Redux-persist
 import {
@@ -23,7 +26,9 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authSlice,
-  book: bookSlice
+  book: bookSlice,
+  student:studentSlice,
+  search:searchSlice
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

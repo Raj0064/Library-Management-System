@@ -180,27 +180,66 @@ export const updateProfile = async (req, res) => {
     console.log(error);
   }
 };
+export const getUserbyId=async(req,res)=>{
+  try{
+    const userId=req.params.id;
+   const user = await User.findById(userId).populate({
+     path: "borrowedBooks.book", // Populate the book field in borrowedBooks
+     model: "BookModel", // Explicitly specify the Book model to populate the `book` field
+   });
 
-// export const getAllBorrowedBooks=async(req,res)=>{
-//   try{
-//     const userId=req.id;
-//     const user=await User.findById(userId);
-//     if(!user)
-//     {
-//       return res.status(400).json({
-//         message:"User not found",
-//         status:false
-//       })
-//     }
-//     const allBooks=user.borrowedBooks.map()
+    if(!user)
+    {
+      return res.status(400).json({
+        message:"User not found",
+        success:false
+      })
+    }
+    return res.status(200).json({
+      data:user,
+      success:true
+    })
 
-//   }
-//   catch(error)
-//   {
-//     console.log(error);
-//     return res.json({
-//       message:"Server Error"
-//     })
+  }
+  catch(error)
+  {
+    console.log(error);
+    return res.json({
+      message:"Server Error",
+      success:false
+    })
 
-//   }
-// }
+  }}
+
+export const getAllBorrowedBooks=async(req,res)=>{
+  try{
+    const userId=req.id;
+    const user=await User.findById(userId);
+    if(!user)
+    {
+      return res.status(400).json({
+        message:"User not found",
+        status:false
+      })
+    }
+   const allBooks = await user.populate({
+     path: "borrowedBooks", 
+     populate: {
+       path: "book",
+       model: "BookModel",
+     },
+   });
+    return res.status(200).json({
+      books:allBooks,
+      success: true,
+    });
+  }
+  catch(error)
+  {
+    console.log(error);
+    return res.json({
+      message:"Server Error"
+    })
+
+  }
+}

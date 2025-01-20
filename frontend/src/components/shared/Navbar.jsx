@@ -27,6 +27,7 @@ const Navbar = () => {
       if (res.data.success) {
         dispatch(setUser(null));
         navigate("/");
+        localStorage.removeItem('persist:root');  // Remove persisted Redux state from localStorage
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -45,7 +46,8 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-10">
           <ul className="flex font-medium items-center gap-5">
-            {user && user.role === "admin" ? (
+            {user ? (
+            user.role === "admin" ? (
               <>
                 <li>
                   <Link to="/admin/dashboard">Dashboard</Link>
@@ -54,7 +56,7 @@ const Navbar = () => {
                   <Link to="/admin/books">Books</Link>
                 </li>
                 <li>
-                  <Link to="/admin/users">Users</Link>
+                  <Link to="/admin/allusers">Users</Link>
                 </li>
               </>
             ) : (
@@ -63,17 +65,22 @@ const Navbar = () => {
                   <Link to="/">Home</Link>
                 </li>
                 <li>
-                  <Link to="/jobs">Search Books</Link>
+                    <Link to="/user/searchbooks">Search Books</Link>
                 </li>
                 <li>
-                  <Link to="/browse">Borrowed Books</Link>
+                  <Link to="/user/borrowedbooks">Borrowed Books</Link>
                 </li>
+                
 
               </>
-            )}
+            )):<>
+
+            </>}
           </ul>
           {!user ? (
+            
             <div className="flex gap-3">
+              
               <Button variant="outline">
                 <Link to="/login">Login</Link>
               </Button>
@@ -102,11 +109,11 @@ const Navbar = () => {
                       </p>
                     </div>
                   </div>
-                  {user?.role === 'recruiter' ? "" : (
+                  {user?.role === 'admin' ? "" : (
                     <Button variant="link" className="flex gap-3">
                       <CircleUserRound />
                       <span className="font-medium">
-                        <Link to="/profile"> Profile </Link>
+                        <Link to="/#"> Profile </Link>
                       </span>
                     </Button>
                   )}
