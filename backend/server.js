@@ -21,7 +21,7 @@ const _dirname=path.resolve();
 
 
 const corsOption = {
-  origin: "http://localhost:5173", // Specify the client origin
+  origin: "https://library-management-system-oo5a.vercel.app/", // Specify the client origin
   credentials: true, // Include credentials if necessary
 };
 app.use(cors(corsOption));
