@@ -10,6 +10,6 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "public", // This specifies the output directory after building
+    outDir: "dist", // This specifies the output directory after building
   },
 });
