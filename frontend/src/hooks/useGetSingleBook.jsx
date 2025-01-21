@@ -22,6 +22,6 @@ const useGetSingleBook = (bookId) => {
       }
     }
     fetchSingleBook();
-  }, [dispatch,singlebook]);
+  }, [dispatch]);
 }
 export default useGetSingleBook;
